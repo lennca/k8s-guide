@@ -1,0 +1,36 @@
+---
+#      loop: [ 'apt-transport-https', 'ca-certificates', 'curl', 'software-properties-common', 'jq',]
+    - name: Install required system packages
+      apt:
+        name:
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+        state: latest
+#        update_cache: no
+        autoclean: yes
+    - name: Add Docker GPG apt Key
+      apt_key:
+        state: present
+        url: https://download.docker.com/linux/ubuntu/gpg
+        keyring: /usr/share/keyrings/docker-archive-keyring.gpg
+    
+    - name: Add Docker Repository
+      apt_repository:
+        repo: deb https://download.docker.com/{{ ansible_system | lower }}/{{ ansible_distribution | lower }} {{ ansible_distribution_release | lower }} stable
+#        state: present
+#        update_cache: no
+    - name: install docker
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+        state: latest
+#        update_cache: no
+    - name: Start docker if not started
+      service:
+        name: docker
+        state: started
+        enabled: yes
