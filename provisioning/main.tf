@@ -15,3 +15,8 @@ provider "openstack" {
   region      = var.region
   tenant_id   = var.tenant_id
 }
+
+module "network" {
+  source              = "./modules/network/"
+  external_network_id = var.external_network_id
+}
