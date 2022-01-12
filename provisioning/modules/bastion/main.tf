@@ -19,3 +19,14 @@ resource "openstack_compute_instance_v2" "bastion" {
     name = var.network_name
   }
 }
+
+#Allocate float IP
+resource "openstack_networking_floatingip_v2" "floatip" {
+  pool = "public"
+}
+
+#Associate float IP to instance
+resource "openstack_compute_floatingip_associate_v2" "floatip_ass" {
+  floating_ip = "${openstack_networking_floatingip_v2.floatip.address}"
+  instance_id = "${openstack_compute_instance_v2.bastion.id}"
+}
