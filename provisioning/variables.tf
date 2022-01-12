@@ -34,6 +34,11 @@ variable "external_network_id" {
   description = "External public network id from CS Cloud"
 }
 
+variable "instances" {
+  description = "Number of woker nodes"
+  type        = number
+}
+
 #needed?
 variable "key_pair" {
   type      = string

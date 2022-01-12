@@ -23,7 +23,15 @@ module "network" {
 
 module "bastion" {
   source       = "./modules/bastion/"
+  depends_on   = [module.network]
   key_pair     = var.key_pair
   network_name = module.network.network_name
-  depends_on   = [module.network]
+}
+
+module "instance" {
+  source              = "./modules/instance/"
+  depends_on          = [module.network]
+  key_pair            = var.key_pair
+  network_name        = module.network.network_name
+  instances           = var.instances
 }
