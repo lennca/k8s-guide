@@ -12,7 +12,7 @@ resource "openstack_compute_instance_v2" "bastion" {
   image_id          = "ca4bec1a-ac25-434f-b14c-ad8078ccf39f" #Ubuntu server 20.04 
   flavor_name       = "c2-r2-d20"
   key_pair          = var.key_pair
-  security_groups   = ["default"]
+  security_groups   = var.sec_groups
   availability_zone = "Education"
 
   network {

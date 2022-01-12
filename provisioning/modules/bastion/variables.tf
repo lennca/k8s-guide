@@ -7,3 +7,8 @@ variable "network_name" {
   type        = string
   description = "The name of the network"
 }
+
+variable "sec_groups" {
+  type        = list(string)
+  description = "List of security rules"
+}

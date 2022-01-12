@@ -39,6 +39,12 @@ variable "instances" {
   type        = number
 }
 
+variable "ssh_name" {
+  type        = string
+  default     = "ssh"
+  description = "Name for security rule ssh"
+}
+
 #needed?
 variable "key_pair" {
   type      = string
