@@ -20,3 +20,10 @@ module "network" {
   source              = "./modules/network/"
   external_network_id = var.external_network_id
 }
+
+module "bastion" {
+  source       = "./modules/bastion/"
+  key_pair     = var.key_pair
+  network_name = module.network.network_name
+  depends_on   = [module.network]
+}
