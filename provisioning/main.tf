@@ -41,3 +41,23 @@ module "instance" {
   network_name = module.network.network_name
   instances    = var.instances
 }
+
+/* Create Ansible inventory file */
+resource "local_file" "ansible_inventory" {
+  depends_on = [
+    module.network, module.sec_group, module.instance
+  ]
+
+  content = templatefile("hosts.tftpl", {
+    master_name     = module.instance.master_name,
+    master_ip       = module.instance.master_ip,
+    worker_name     = module.instance.worker_name,
+    worker_ip       = module.instance.worker_ip,
+    bastion_ip      = module.bastion.bastion_ip,
+    bastion_name    = module.bastion.bastion_name,
+    bastion_float   = module.bastion.bastion_float
+    }
+  )
+  filename = "../configuration/ansible/hosts"
+}
+

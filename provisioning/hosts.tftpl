@@ -1,0 +1,14 @@
+[masters]
+${master_name} ansible_host=${master_ip} ansible_user=ubuntu
+
+[workers]
+%{ for index, addr in worker_ip ~}
+${worker_name[index]} ansible_host=${addr} ansible_user=ubuntu
+%{ endfor ~}
+
+[bastions]
+${bastion_name} ansible_host=${bastion_ip} ansible_user=ubuntu
+
+[all:vars]
+ansible_ssh_common_args='-o StrictHostKeyChecking=no -o ProxyCommand="ssh -W %h:%p -q -i /home/caesar/.ssh/cl223mf_key_ssh.pem ubuntu@${bastion_float}"'
+ansible_ssh_user=ubuntu
