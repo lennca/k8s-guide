@@ -2,18 +2,19 @@
     - name: Update and install packages to allow apt to use a repository over HTTPS
       apt:
         name:
-          - ca-certificates
+          - ca-certificates #needed for K8s & Docker
           - curl
           - gnupg
           - lsb-release
-#          - apt-transport-https
+          - apt-transport-https #needed for K8s
         state: latest
     - name: Add Docker's official GPG key
       apt_key:
-        url: https://download.docker.com/linux/ubuntu/gpg    
+        url: https://download.docker.com/linux/ubuntu/gpg
+        keyring: /usr/share/keyrings/docker-archive-keyring.gpg
     - name: Add Docker Repository
       apt_repository:
-        repo: "deb [arch=amd64] https://download.docker.com/linux/{{ ansible_distribution | lower }} {{ ansible_distribution_release | lower }} stable"
+        repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/{{ ansible_distribution | lower }} {{ ansible_distribution_release | lower }} stable"
         state: present
         update_cache: no
         filename: docker

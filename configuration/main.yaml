@@ -1,7 +1,9 @@
 ---
-
 - hosts: masters
   become: true
   roles:
     - ping
+    - swap
+    - reboot
     - docker
+    - kubernetes
