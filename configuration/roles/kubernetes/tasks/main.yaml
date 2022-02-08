@@ -12,9 +12,9 @@
     - name: Install kubelet, kubeadm and kubectl
       apt:
         name:
-          - kubectl
           - kubelet
           - kubeadm
+          - kubectl
         state: latest
         update_cache: yes
     - name: Prevent packages from being upgraded

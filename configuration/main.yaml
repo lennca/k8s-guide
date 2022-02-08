@@ -5,5 +5,7 @@
     - ping
     - swap
     - reboot
+    - containerd
     - docker
     - kubernetes
+    - kubernetes_master

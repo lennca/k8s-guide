@@ -24,8 +24,8 @@
     - name: Install Docker Engine and containerd
       apt:
         name:
-          - docker-ce
-          - docker-ce-cli
+#          - docker-ce
+#          - docker-ce-cli
           - containerd.io
         state: latest
     ### Configure container runtime to be containerd
