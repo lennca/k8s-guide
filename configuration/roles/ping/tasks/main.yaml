@@ -3,4 +3,3 @@
     - name: Ping hosts
       action: ping
     - debug: msg="Success"
-

@@ -1,0 +1,27 @@
+---
+    - name: Download Google Cloud public signing key
+      apt_key:
+        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+        keyring: /usr/share/keyrings/kubernetes-archive-keyring.gpg
+    - name: Add Kubernetes Repository
+      apt_repository:
+        repo: deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main
+        state: present
+        update_cache: no
+        filename: /etc/apt/sources.list.d/kubernetes.list
+    - name: Install kubelet, kubeadm and kubectl
+      apt:
+        name:
+          - kubectl
+          - kubelet
+          - kubeadm
+        state: latest
+        update_cache: yes
+    - name: Prevent packages from being upgraded
+      dpkg_selections:
+        name: "{{ item }}"
+        selection: hold
+      loop:
+        - kubelet
+        - kubeadm
+        - kubectl
