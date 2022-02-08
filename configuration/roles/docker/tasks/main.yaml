@@ -1,36 +1,40 @@
 ---
-#      loop: [ 'apt-transport-https', 'ca-certificates', 'curl', 'software-properties-common', 'jq',]
-    - name: Install required system packages
+    - name: Update and install packages to allow apt to use a repository over HTTPS
       apt:
         name:
           - ca-certificates
           - curl
           - gnupg
           - lsb-release
+#          - apt-transport-https
         state: latest
-#        update_cache: no
-        autoclean: yes
-    - name: Add Docker GPG apt Key
+    - name: Add Docker's official GPG key
       apt_key:
-        state: present
-        url: https://download.docker.com/linux/ubuntu/gpg
-        keyring: /usr/share/keyrings/docker-archive-keyring.gpg
-    
+        url: https://download.docker.com/linux/ubuntu/gpg    
     - name: Add Docker Repository
       apt_repository:
-        repo: deb https://download.docker.com/{{ ansible_system | lower }}/{{ ansible_distribution | lower }} {{ ansible_distribution_release | lower }} stable
-#        state: present
-#        update_cache: no
-    - name: install docker
+        repo: "deb [arch=amd64] https://download.docker.com/linux/{{ ansible_distribution | lower }} {{ ansible_distribution_release | lower }} stable"
+        state: present
+        update_cache: no
+        filename: docker
+    - name: Update the `apt` package index
+      apt:
+        update_cache: yes
+    - name: Install Docker Engine and containerd
       apt:
         name:
           - docker-ce
           - docker-ce-cli
           - containerd.io
         state: latest
-#        update_cache: no
-    - name: Start docker if not started
+    ### Configure container runtime to be containerd
+    - name: Configure containerd directory
+      file:
+        path: /etc/containerd   
+        state: directory
+    - name: Configure containerd
+      shell: containerd config default | sudo tee /etc/containerd/config.toml
+    - name: Restart containerd
       service:
-        name: docker
-        state: started
-        enabled: yes
+        name: containerd
+        state: restarted
