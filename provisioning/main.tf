@@ -55,9 +55,60 @@ resource "local_file" "ansible_inventory" {
     worker_ip       = module.instance.worker_ip,
     bastion_ip      = module.bastion.bastion_ip,
     bastion_name    = module.bastion.bastion_name,
-    bastion_float   = module.bastion.bastion_float
+    bastion_float   = module.bastion.bastion_float,
+    key_name        = var.key_name
     }
   )
-  filename = "../configuration/ansible/hosts"
+  filename = "../configuration/hosts"
 }
 
+/* Create Ansible config file */
+resource "local_file" "ansible_config" {
+  depends_on = [
+    module.network, module.sec_group, module.instance
+  ]
+
+  content = templatefile("config.tftpl", {
+    key_name     = var.key_name
+    }
+  )
+  filename = "../configuration/ansible.cfg"
+}
+
+/* Delay Ansible execution (wait for resources to be fully launched) */
+resource "time_sleep" "wait_30_seconds" {
+  depends_on = [
+    module.network, module.sec_group, module.bastion, module.instance, resource.local_file.ansible_inventory, resource.local_file.ansible_config
+  ]
+
+  create_duration = "30s"
+}
+
+resource "null_resource" "execfile" {
+  depends_on = [
+    time_sleep.wait_30_seconds
+  ]
+
+  # Prep the key for Ansible
+  provisioner "local-exec" {
+    #remove entity from known_hosts ssh-keygen -R hostname
+    #add entity to known_hosts ssh-keyscan $ip >> ~/.ssh/known_hosts)
+    command = "(ssh-keygen -R $ip ; ssh-keyscan -H $ip >> ~/.ssh/known_hosts ; eval `ssh-agent` ; ssh-add -k ~/.ssh/$keyName ; scp ~/.ssh/$keyName ubuntu@$ip:.ssh ; ssh -t ubuntu@$ip ; chmod 600 ~/.ssh/$keyName)"
+    environment = {
+      ip      = module.bastion.bastion_float
+      keyName = var.key_name
+    }
+  }
+
+
+  # Run Ansible playbook
+  provisioner "local-exec" {
+    command = "(cd ../configuration ; ansible-playbook -i hosts main.yaml)"
+  }
+}
+
+/* Print bastion float ip */
+output "loadbalancer_public_ip" {
+  value       = module.bastion.bastion_float
+  description = "Bastion public ip"
+}
