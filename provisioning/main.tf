@@ -108,7 +108,13 @@ resource "null_resource" "execfile" {
 }
 
 /* Print bastion float ip */
-output "loadbalancer_public_ip" {
+output "bastion_public_ip" {
   value       = module.bastion.bastion_float
   description = "Bastion public ip"
+}
+
+/* Print bastion float ip */
+output "master_private_ip" {
+  value       = module.instance.master_ip
+  description = "Master private ip"
 }
