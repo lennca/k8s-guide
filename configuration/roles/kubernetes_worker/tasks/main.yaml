@@ -1,0 +1,5 @@
+---
+    - name: Join Kubernetes cluster.
+      shell: "{{ hostvars['master'].join_command }}"
+      args:
+        chdir: $HOME
