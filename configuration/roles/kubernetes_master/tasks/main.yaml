@@ -1,43 +1,40 @@
 ---
-    - name: Initialize the control-plane node
+    - name: Initialize the control-plane node.
       shell: kubeadm init --pod-network-cidr=10.0.0.0/16
-    - name: Create a directory if it does not exist
+      args:
+        chdir: /home/ubuntu
+    - name: Create .kube directory.
+      become_user: ubuntu
       file:
         path: $HOME/.kube
         state: directory
-    - name: Copy file with owner and permissions
+        mode: 0755
+    - name: Copy kubernetes config file.
       copy:
         src: /etc/kubernetes/admin.conf
-        dest: $HOME/.kube/config
-        remote_src: true
-    - name: Set kubeconfig file permission
+        dest: /home/ubuntu/.kube/config
+        remote_src: yes
+        owner: ubuntu
+    - name: Set kubernetes config file permissions.
+      become_user: ubuntu
       file:
         path: $HOME/.kube/config
-        owner: "{{ ansible_effective_user_id }}"
-        group: "{{ ansible_effective_group_id }}"
-    - name: Test
-      shell: echo "{{ ansible_effective_user_id }}" >> test1.txt
-      args:
-        chdir: $HOME
-    - name: Test2
-      shell: echo "{{ ansible_effective_group_id }}" >> test2.txt
-      args:
-        chdir: $HOME
-    - name: Download the Calico networking manifest
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: 0644
+    - name: Download the Calico networking manifest.
+      become_user: ubuntu
       get_url:
         url: https://projectcalico.docs.tigera.io/manifests/calico.yaml
         dest: $HOME/calico.yaml
-    - name: Install pod network
-      shell: kubectl apply -f $HOME/calico.yaml
-    - name: get join command
+    - name: Install pod network.
+      become_user: ubuntu
+      shell: kubectl apply -f /home/ubuntu/calico.yaml
+    - name: Retreieve join command.
       shell: kubeadm token create --print-join-command
       register: join_command_raw
       args:
-        chdir: $HOME
-    - name: test3
-      shell: echo "{{ join_command_raw }}" >> test3.txt
-      args:
-        chdir: $HOME
-    - name: set join command
+        chdir: /home/ubuntu
+    - name: Set join command as Ansible fact.
       set_fact:
         join_command: "{{ join_command_raw.stdout_lines[0] }}"
