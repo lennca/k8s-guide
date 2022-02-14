@@ -1,5 +1,5 @@
 ---
-- hosts: masters
+- hosts: masters:workers
   become: true
   roles:
     - ping
@@ -8,4 +8,11 @@
     - containerd
     - docker
     - kubernetes
+- hosts: masters
+  become: true
+  roles:
     - kubernetes_master
+- hosts: workers
+  become: true
+  roles:
+    - kubernetes_worker
