@@ -1,0 +1,17 @@
+---
+    - name: Ensure "resources" directory exists.
+      file: 
+        path: /home/ubuntu/resources
+        state: directory
+    - name: Copy Kubernetes manifest/yaml files to directory.
+      become: true 
+      copy:
+        src: ./templates/
+        dest: /home/ubuntu/resources
+    - name: Apply and create nginx daemonset.
+      become: true
+      become_user: ubuntu
+      k8s:
+        namespace: default
+        state: present
+        src: /home/ubuntu/resources/nginx_daemonset.yaml

@@ -1,0 +1,12 @@
+---
+    - name: Install python pip
+      apt:
+        name: python3-pip
+        state: present
+    - name: Install (Ansible-K8s module) required pip-packages
+      pip:
+        name:
+          - kubernetes
+          - openshift
+          - jsonpatch
+          - PyYAML
