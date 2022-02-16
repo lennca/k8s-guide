@@ -2,7 +2,7 @@ terraform {
   required_providers {
     openstack = {
       source  = "terraform-provider-openstack/openstack"
-      version = "1.46.0"
+      version = "~> 1.35.0"
     }
   }
 }
@@ -28,7 +28,7 @@ resource "openstack_compute_instance_v2" "worker" {
   image_id          = "ca4bec1a-ac25-434f-b14c-ad8078ccf39f" #Ubuntu server 20.04 
   flavor_name       = "c2-r2-d20"
   key_pair          = var.key_pair
-  security_groups   = ["default"]
+  security_groups   = ["default", var.secgroup_nodeport]
   availability_zone = "Education"
 
   network {
