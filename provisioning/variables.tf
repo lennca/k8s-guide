@@ -3,7 +3,7 @@ variable "auth_url" {
   description = "AUTH_URL from rc-file"
 }
 
-variable "user_name" {
+variable "username" {
   type        = string
   description = "CSCloud username"
 }

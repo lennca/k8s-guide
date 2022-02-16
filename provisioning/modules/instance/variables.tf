@@ -23,3 +23,7 @@ variable "instance_names" {
   type    = list(string)
   default = ["worker-1", "worker-2", "worker-3", "worker-4", "worker-5"]
 }
+
+variable "secgroup_nodeport" {
+  type = string
+}

@@ -1,21 +1,3 @@
-terraform {
-  required_providers {
-    openstack = {
-      source  = "terraform-provider-openstack/openstack"
-      version = "1.46.0"
-    }
-  }
-}
-
-provider "openstack" {
-  user_name   = var.user_name
-  tenant_name = var.tenant_name
-  password    = var.password
-  auth_url    = var.auth_url
-  region      = var.region
-  tenant_id   = var.tenant_id
-}
-
 module "network" {
   source              = "./modules/network/"
   external_network_id = var.external_network_id
@@ -40,12 +22,21 @@ module "instance" {
   key_pair     = var.key_pair
   network_name = module.network.network_name
   instances    = var.instances
+  secgroup_nodeport = module.sec_group.secgroup_nodeport
+}
+
+module "loadbalancer" {
+  depends_on    = [module.network, module.sec_group, module.instance, module.bastion]
+  source        = "./modules/loadbalancer/"
+  address       = module.instance.worker_ip
+  vip_subnet_id = module.network.vip_subnet_id
+  sec_group_ids  = module.sec_group.sec_group_ids
 }
 
 /* Create Ansible inventory file */
 resource "local_file" "ansible_inventory" {
   depends_on = [
-    module.network, module.sec_group, module.instance
+    module.network, module.sec_group, module.instance, module.loadbalancer
   ]
 
   content = templatefile("hosts.tftpl", {
@@ -62,10 +53,10 @@ resource "local_file" "ansible_inventory" {
   filename = "../configuration/hosts"
 }
 
-/* Create Ansible config file */
+# Create Ansible config file
 resource "local_file" "ansible_config" {
   depends_on = [
-    module.network, module.sec_group, module.instance
+    module.network, module.sec_group, module.instance, module.loadbalancer
   ]
 
   content = templatefile("config.tftpl", {
@@ -75,10 +66,10 @@ resource "local_file" "ansible_config" {
   filename = "../configuration/ansible.cfg"
 }
 
-/* Delay Ansible execution (wait for resources to be fully launched) */
+# Delay Ansible execution (wait for resources to be fully launched)
 resource "time_sleep" "wait_30_seconds" {
   depends_on = [
-    module.network, module.sec_group, module.bastion, module.instance, resource.local_file.ansible_inventory, resource.local_file.ansible_config
+    module.network, module.sec_group, module.bastion, module.instance, module.loadbalancer, resource.local_file.ansible_inventory, resource.local_file.ansible_config
   ]
 
   create_duration = "30s"
@@ -116,5 +107,11 @@ output "bastion_public_ip" {
 /* Print bastion float ip */
 output "master_private_ip" {
   value       = module.instance.master_ip
+  description = "Master private ip"
+}
+
+/* Print Load Balancer ip */
+output "load_balancer_ip" {
+  value       = module.loadbalancer.lb_public_ip
   description = "Master private ip"
 }
