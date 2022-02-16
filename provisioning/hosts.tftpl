@@ -15,3 +15,5 @@ private_key_file=~/.ssh/${key_name}
 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o ProxyCommand="ssh -o \'ForwardAgent yes\' ubuntu@${bastion_float} -p 22 \'ssh-add ~/.ssh/${key_name} && nc %h %p\'"'
 #ansible_ssh_common_args: "-o ProxyCommand=\"ssh -q ubuntu@${bastion_float} -o IdentityFile=~/.ssh/${key_name} -o Port=22 -W %h:%p\""
 #ansible_ssh_common_args: "-J ubuntu@${bastion_float}"
+[all:vars]
+ansible_python_interpreter=/usr/bin/python3
