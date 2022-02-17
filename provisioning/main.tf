@@ -33,7 +33,7 @@ module "loadbalancer" {
   sec_group_ids  = module.sec_group.sec_group_ids
 }
 
-/* Create Ansible inventory file */
+# Create Ansible inventory file.
 resource "local_file" "ansible_inventory" {
   depends_on = [
     module.network, module.sec_group, module.instance, module.loadbalancer
@@ -53,7 +53,7 @@ resource "local_file" "ansible_inventory" {
   filename = "../configuration/hosts"
 }
 
-# Create Ansible config file
+# Create Ansible config file.
 resource "local_file" "ansible_config" {
   depends_on = [
     module.network, module.sec_group, module.instance, module.loadbalancer
@@ -66,7 +66,7 @@ resource "local_file" "ansible_config" {
   filename = "../configuration/ansible.cfg"
 }
 
-# Delay Ansible execution (wait for resources to be fully launched)
+# Delay Ansible execution (wait for resources to be fully launched).
 resource "time_sleep" "wait_30_seconds" {
   depends_on = [
     module.network, module.sec_group, module.bastion, module.instance, module.loadbalancer, resource.local_file.ansible_inventory, resource.local_file.ansible_config
@@ -80,10 +80,10 @@ resource "null_resource" "execfile" {
     time_sleep.wait_30_seconds
   ]
 
-  # Prep the key for Ansible
+  # Prepare the key for Ansible.
   provisioner "local-exec" {
-    #remove entity from known_hosts ssh-keygen -R hostname
-    #add entity to known_hosts ssh-keyscan $ip >> ~/.ssh/known_hosts)
+    # remove entity from known_hosts -> ssh-keygen -R hostname
+    # add entity to known_hosts -> ssh-keyscan $ip >> ~/.ssh/known_hosts)
     command = "(ssh-keygen -R $ip ; ssh-keyscan -H $ip >> ~/.ssh/known_hosts ; eval `ssh-agent` ; ssh-add -k ~/.ssh/$keyName ; scp ~/.ssh/$keyName ubuntu@$ip:.ssh ; ssh -t ubuntu@$ip ; chmod 600 ~/.ssh/$keyName)"
     environment = {
       ip      = module.bastion.bastion_float
@@ -91,27 +91,31 @@ resource "null_resource" "execfile" {
     }
   }
 
+}
+resource "null_resource" "execfile2" {
+  count = var.run_ansible == "yes" ? 1 : 0
+  depends_on = [
+    time_sleep.wait_30_seconds, null_resource.execfile
+  ]
 
-  # Run Ansible playbook
+  # Run Ansible playbook.
   provisioner "local-exec" {
     command = "(cd ../configuration ; ansible-playbook -i hosts main.yaml)"
   }
 }
 
-/* Print bastion float ip */
+/* Print bastion float ip, master private ip, and load balancer float ip. */
 output "bastion_public_ip" {
   value       = module.bastion.bastion_float
-  description = "Bastion public ip"
+  description = "Bastion floating ip."
 }
 
-/* Print bastion float ip */
 output "master_private_ip" {
   value       = module.instance.master_ip
-  description = "Master private ip"
+  description = "Master private ip."
 }
 
-/* Print Load Balancer ip */
 output "load_balancer_ip" {
   value       = module.loadbalancer.lb_public_ip
-  description = "Master private ip"
+  description = "Load Balancer floating ip."
 }

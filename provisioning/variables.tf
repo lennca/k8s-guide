@@ -35,7 +35,7 @@ variable "external_network_id" {
 }
 
 variable "instances" {
-  description = "Number of woker nodes"
+  description = "Number of worker nodes (1-5)."
   type        = number
 }
 
@@ -52,5 +52,10 @@ variable "key_pair" {
 }
 
 variable "key_name" {
+  type = string
+}
+
+variable "run_ansible" {
+  description = "Run Ansible automatically after Terraform is finished?\nOnly 'yes' will be accepted to approve."
   type = string
 }
