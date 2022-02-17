@@ -6,6 +6,11 @@ command_warnings=False
 deprecation_warnings=False
 # To ignore known_hosts issue
 host_key_checking=False
+gathering = smart
+fact_caching = jsonfile
+fact_caching_connection = /tmp
+#callback_whitelist = profile_tasks
 
 [ssh_connection]
-ssh_args=-o ControlMaster=auto -o ControlPersist=60s -o ControlPath=/tmp/ansible-ssh-%h-%p-%r -o ForwardAgent=yes
+pipelining=True
+ssh_args=-o ControlMaster=auto -o ControlPersist=3600s -o ControlPath=/tmp/ansible-ssh-%h-%p-%r -o ForwardAgent=yes
